@@ -70,8 +70,6 @@ def LGFN(in_path, out_path, gpu):
     if not os.path.exists("~/LGFN"):
         os.system("git clone https://github.com/EvgeneyZ/LGFN.git ~/LGFN")
 
-    vids = os.listdir(in_path)
-
     start_time = datetime.now()
     os.system(f"docker run -it -v ~/LGFN:/model -v {in_path}:/dataset --shm-size=8192mb --gpus='\"device={gpu}\"' --rm lgfn") 
     end_time = datetime.now()
@@ -84,11 +82,27 @@ def LGFN(in_path, out_path, gpu):
     return "~/LGFN", end_time - start_time
 
 
+def BasicVSR(in_path, out_path, gpu):
+    if not os.path.exists("~/BasicVSR"):
+        os.system("git clone https://github.com/EvgeneyZ/BasicVSR.git ~/BasicVSR")
+        os.system("wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1EVMaV8-c2Q1r10N-CAuobIsbeSR-wptM' -O ~/BasicVSR/experiments/pretrained_models/BasicVSR_REDS4.pth")
+
+    start_time = datetime.now()
+    os.system(f"docker run -it -v ~/BasicVSR:/model -v {in_path}:/dataset --shm-size=8192mb --user $(id -u):$(id -g) --gpus='\"device={gpu}\"' --rm basicvsr")
+    end_time = datetime.now()
+
+    vids = os.listdir(os.path.join(os.path.expanduser('~'), "BasicVSR/result"))
+    for vid in vids:
+        os.system(f"mv ~/BasicVSR/result/{vid} {out_path}/{vid}")
+    
+    return "~/BasicVSR", end_time - start_time
+
+
 def process_input(in_path):
     _, folders, files = next(os.walk(in_path))
 
     if len(files) > 0:
-        print('Input path should only containfolders with frames.')
+        print('Input path should only contain folders with frames.')
         return False
 
     return True
@@ -153,6 +167,8 @@ def main():
         model_path, runtime = SOFVSR(in_path, out_path, args.gpu, 'BD')
     elif args.model == "LGFN":
         model_path, runtime = LGFN(in_path, out_path, args.gpu)
+    elif args.model == "BasicVSR":
+        model_path, runtime = BasicVSR(in_path, out_path, args.gpu)
 
     if args.csv_file is not None and runtime is not None:
         process_time(runtime, args.csv_file, args.model, in_path)
