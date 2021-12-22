@@ -101,11 +101,17 @@ def BasicVSR(in_path, out_path, gpu):
 def process_input(in_path):
     _, folders, files = next(os.walk(in_path))
 
-    if len(files) > 0:
-        print('Input path should only contain folders with frames.')
-        return False
+    if len(folders) and len(files) > 0:
+        print('Input path should only contain frames or folders with frames.')
+        return None
 
-    return True
+    if len(folders) > 0:
+        return in_path
+
+    Path(os.path.join(os.path.expanduser("~"), "__dataset__/folder")).mkdir(parents=True, exist_ok=True)
+    os.system(f"ffmpeg -i {in_path}/frame%04d.png -c copy ~/__dataset__/folder/frame%04d.png")
+
+    return os.path.abspath(os.path.join(os.path.expanduser('~'), "__dataset__"))
 
 
 def add_missing_frames(out_path):
@@ -120,10 +126,13 @@ def add_missing_frames(out_path):
 
 def process_time(runtime, out_file, model_name, in_path):
     total_frames = 0
-    videos = os.listdir(in_path)
+    _, videos, frames = next(os.walk(in_path))
     
-    for video in videos:
-        total_frames += len(os.listdir(f"{in_path}/{video}"))
+    if len(videos) != 0:
+        for video in videos:
+            total_frames += len(os.listdir(f"{in_path}/{video}"))
+    else:
+        total_frames = len(frames)
     
     if not os.path.isfile(out_file):
         with open(out_file, 'w') as f:
@@ -149,11 +158,12 @@ def main():
     
     args = parser.parse_args()
 
-    in_path = os.path.abspath(args.in_path)
+    in_path_orig = os.path.abspath(args.in_path)
     out_path = os.path.abspath(args.out_path)
 
-    if not process_input(args.in_path):
-        return 
+    in_path = process_input(in_path_orig)
+    if in_path is None:
+        return
     
     Path(out_path).mkdir(parents=True, exist_ok=True)
 
@@ -170,8 +180,13 @@ def main():
     elif args.model == "BasicVSR":
         model_path, runtime = BasicVSR(in_path, out_path, args.gpu)
 
+    if in_path_orig != in_path:
+        os.system(f"rm -r {in_path}")
+        os.system(f"ffmpeg -i {out_path}/folder/frame%04d.png -c copy {out_path}/frame%04d.png")
+        os.system(f"rm -r {out_path}/folder")
+
     if args.csv_file is not None and runtime is not None:
-        process_time(runtime, args.csv_file, args.model, in_path)
+        process_time(runtime, args.csv_file, args.model, in_path_orig)
 
     if not args.keep_model and model_path is not None:
         os.system(f"rm -r {model_path}")
