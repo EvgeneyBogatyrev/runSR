@@ -98,6 +98,21 @@ def BasicVSR(in_path, out_path, gpu):
     return "~/BasicVSR", end_time - start_time
 
 
+def RSDN(in_path, out_path, gpu):
+    if not os.path.exists("~/RSDN"):
+        os.system("git clone https://github.com/EvgeneyZ/RSDN.git ~/RSDN")
+
+    start_time = datetime.now()
+    os.system(f"docker run -it -v ~/RSDN:/model -v {in_path}:/dataset --shm-size=8192mb --gpus='\"device={gpu}\"' --rm rsdn") 
+    end_time = datetime.now()
+
+    vids = os.listdir(os.path.join(os.path.expanduser('~'), "RSDN/result"))
+    for vid in vids:
+        os.system(f"mv ~/RSDN/result/{vid} {out_path}/{vid}")
+
+    return "~/RSDN", end_time - start_time
+
+
 def process_input(in_path):
     _, folders, files = next(os.walk(in_path))
 
@@ -179,6 +194,8 @@ def main():
         model_path, runtime = LGFN(in_path, out_path, args.gpu)
     elif args.model == "BasicVSR":
         model_path, runtime = BasicVSR(in_path, out_path, args.gpu)
+    elif args.model == "RSDN":
+        model_path, runtime = RSDN(in_path, out_path, args.gpu)
 
     if in_path_orig != in_path:
         os.system(f"rm -r {in_path}")
