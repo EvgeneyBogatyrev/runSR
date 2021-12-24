@@ -95,6 +95,14 @@ def RSDN(in_path, out_path, gpu):
     return runtime
 
 
+def RBPN(in_path, out_path, gpu):
+    clone_repository("RBPN")
+    os.system("wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=11_4rsGOfbiAxqAoDoRq4vHMcXxRqc6Cc' -O ~/__SR_models__/RBPN/weights/RBPN_4x.pth")
+    runtime = run_docker("RBPN", "rbpn", in_path, gpu, root=True)
+    move_frames("RBPN", "result", out_path)
+    return runtime
+
+
 def process_input(in_path):
     _, folders, files = next(os.walk(in_path))
 
@@ -178,6 +186,8 @@ def main():
         runtime = BasicVSR(in_path, out_path, args.gpu)
     elif args.model == "RSDN":
         runtime = RSDN(in_path, out_path, args.gpu)
+    elif args.model == "RBPN":
+        runtime = RBPN(in_path, out_path, args.gpu)
 
     if in_path_orig != in_path:
         os.system(f"rm -r {in_path}")
