@@ -5,112 +5,94 @@ import argparse
 from datetime import datetime
 
 
-def DBVSR(in_path, out_path, gpu):
-    if not os.path.exists('~/DBVSR'):
-        os.system("git clone https://github.com/EvgeneyZ/DBVSR.git ~/DBVSR")
+def clone_repository(model):
+    if not os.path.exists(f"~/__SR_models__/{model}"):
+        Path(os.path.join(os.path.expanduser("~"), "__SR_models__")).mkdir(parents=True, exist_ok=True)
+        os.system(f"git clone https://github.com/EvgeneyZ/{model}.git ~/__SR_models__/{model}")
+
+
+def run_docker(model, image_name, in_path, gpu, root=False):
+    addition = ""
+    if not root:
+        addition = "--user $(id -u):$(id -g) "
+
+    command = f"docker run -it -v ~/__SR_models__/{model}:/model -v {in_path}:/dataset --shm-size=8192mb " + addition + f"--gpus='\"device={gpu}\"' --rm {image_name}"
 
     start_time = datetime.now()
-    os.system(f"docker run -it -v ~/DBVSR:/model -v {in_path}:/dataset --shm-size=8192mb --gpus='\"device={gpu}\"' --rm dbvsr")
+    os.system(command)
     end_time = datetime.now()
 
-    vids = os.listdir(os.path.join(os.path.expanduser('~'), "DBVSR/result"))
-    for vid in vids:
-        os.system(f"mv ~/DBVSR/result/{vid} {out_path}/{vid}")
+    return end_time - start_time
 
+
+def move_frames(model, subdir, out_path):
+    videos = os.listdir(os.path.join(os.path.expanduser('~'), f"__SR_models__/{model}/{subdir}"))
+    for video in videos:
+        os.system(f"mv ~/__SR_models__/{model}/{subdir}/{video} {out_path}/{video}")
+
+
+def DBVSR(in_path, out_path, gpu):
+    clone_repository("DBVSR")
+    runtime = run_docker("DBVSR", "dbvsr", in_path, gpu, root=True)
+    move_frames("DBVSR", "result", out_path)
     add_missing_frames(out_path)
-    return "~/DBVSR", end_time - start_time
-
+    return runtime
 
 
 def TMNet(in_path, out_path, gpu):
-    if not os.path.exists('~/TMNet'):
-        os.system("git clone https://github.com/EvgeneyZ/TMNet.git ~/TMNet")
+    clone_repository("TMNet")
 
     start_time = datetime.now()
     _, vids, _ = next(os.walk(in_path))
     for vid in vids:
-        os.system(f"docker run -it -v ~/TMNet:/model -v {in_path}/{vid}:/dataset --shm-size=8192mb --gpus='\"device={gpu}\"' --rm tmnet")
-        os.system(f"mv ~/TMNet/result/ {out_path}/{vid}")
+        os.system(f"docker run -it -v ~/__SR_models__/TMNet:/model -v {in_path}/{vid}:/dataset --shm-size=8192mb --gpus='\"device={gpu}\"' --rm tmnet")
+        os.system(f"mv ~/__SR_models__/TMNet/result/ {out_path}/{vid}")
     end_time = datetime.now()
 
-    return "~/TMNet", end_time - start_time
+    return end_time - start_time
 
 
 def SOFVSR(in_path, out_path, gpu, degradation='BI'):
     if degradation == 'BI':
-        if not os.path.exists("~/SOF-VSR"):
-            os.system("git clone https://github.com/EvgeneyZ/SOF-VSR ~/SOF-VSR")
+        clone_repository("SOF-VSR")
     elif degradation == 'BD':
-        if not os.path.exists("~/SOF-VSR-BD"):
-            os.system("git clone https://github.com/EvgeneyZ/SOF-VSR ~/SOF-VSR-BD")
+        clone_repository("SOF-VSR-BD")
     else:
         print(degradation, "- wrong degradation")
-        return None, None
+        return None
 
     if degradation == 'BI':
-        start_time = datetime.now()
-        os.system(f"docker run -it -v ~/SOF-VSR:/model -v {in_path}:/dataset --shm-size=8192mb --user $(id -u):$(id -g) --gpus='\"device={gpu}\"' --rm sof-vsr")
-        directory = 'SOF-VSR'
-        end_time = datetime.now()
+        runtime = run_docker("SOF-VSR", "sof-vsr", in_path, gpu)
+        move_frames("SOF-VSR", "results", out_path)
     else: 
-        start_time = datetime.now()
-        os.system(f"docker run -it -v ~/SOF-VSR-BD:/model -v {in_path}:/dataset --shm-size=8192mb --user $(id -u):$(id -g) --gpus='\"device={gpu}\"' --rm sof-vsr")
-        directory = 'SOF-VSR-BD'
-        end_time = datetime.now()
-
-    vids = os.listdir(os.path.join(os.path.expanduser('~'), f"{directory}/results"))
-    for vid in vids:
-        os.system(f"mv ~/{directory}/results/{vid} {out_path}/{vid}")
+        runtime = run_docker("SOF-VSR-BD", "sof-vsr", in_path, gpu)
+        move_frames("SOF-VSR-BD", "results", out_path)
 
     add_missing_frames(out_path)
-    return f"~/{directory}", end_time - start_time
+    return runtime
 
 
 def LGFN(in_path, out_path, gpu):
-    if not os.path.exists("~/LGFN"):
-        os.system("git clone https://github.com/EvgeneyZ/LGFN.git ~/LGFN")
-
-    start_time = datetime.now()
-    os.system(f"docker run -it -v ~/LGFN:/model -v {in_path}:/dataset --shm-size=8192mb --gpus='\"device={gpu}\"' --rm lgfn") 
-    end_time = datetime.now()
-
-    vids = os.listdir(os.path.join(os.path.expanduser('~'), "LGFN/result"))
-    for vid in vids:
-        os.system(f"mv ~/LGFN/result/{vid} {out_path}/{vid}")
-
+    clone_repository('LGFN')
+    runtime = run_docker("LGFN", "lgfn", in_path, gpu, root=True)
+    move_frames("LGFN", "result", out_path)
     add_missing_frames(out_path)
-    return "~/LGFN", end_time - start_time
+    return runtime
 
 
 def BasicVSR(in_path, out_path, gpu):
-    if not os.path.exists("~/BasicVSR"):
-        os.system("git clone https://github.com/EvgeneyZ/BasicVSR.git ~/BasicVSR")
-        os.system("wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1EVMaV8-c2Q1r10N-CAuobIsbeSR-wptM' -O ~/BasicVSR/experiments/pretrained_models/BasicVSR_REDS4.pth")
-
-    start_time = datetime.now()
-    os.system(f"docker run -it -v ~/BasicVSR:/model -v {in_path}:/dataset --shm-size=8192mb --user $(id -u):$(id -g) --gpus='\"device={gpu}\"' --rm basicvsr")
-    end_time = datetime.now()
-
-    vids = os.listdir(os.path.join(os.path.expanduser('~'), "BasicVSR/result"))
-    for vid in vids:
-        os.system(f"mv ~/BasicVSR/result/{vid} {out_path}/{vid}")
-    
-    return "~/BasicVSR", end_time - start_time
+    clone_repository("BasicVSR")
+    os.system("wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1EVMaV8-c2Q1r10N-CAuobIsbeSR-wptM' -O ~/__SR_models__/BasicVSR/experiments/pretrained_models/BasicVSR_REDS4.pth")
+    runtime = run_docker("BasicVSR", "basicvsr", in_path, gpu, root=True)
+    move_frames("BasicVSR", "result", out_path)
+    return runtime
 
 
 def RSDN(in_path, out_path, gpu):
-    if not os.path.exists("~/RSDN"):
-        os.system("git clone https://github.com/EvgeneyZ/RSDN.git ~/RSDN")
-
-    start_time = datetime.now()
-    os.system(f"docker run -it -v ~/RSDN:/model -v {in_path}:/dataset --shm-size=8192mb --gpus='\"device={gpu}\"' --rm rsdn") 
-    end_time = datetime.now()
-
-    vids = os.listdir(os.path.join(os.path.expanduser('~'), "RSDN/result"))
-    for vid in vids:
-        os.system(f"mv ~/RSDN/result/{vid} {out_path}/{vid}")
-
-    return "~/RSDN", end_time - start_time
+    clone_repository("RSDN")
+    runtime = run_docker("RSDN", "rsdn", in_path, gpu)
+    move_frames("RSDN", "result", out_path)
+    return runtime
 
 
 def process_input(in_path):
@@ -183,19 +165,19 @@ def main():
     Path(out_path).mkdir(parents=True, exist_ok=True)
 
     if args.model == "DBVSR":
-        model_path, runtime = DBVSR(in_path, out_path, args.gpu)
+        runtime = DBVSR(in_path, out_path, args.gpu)
     elif args.model == "TMNet":
-        model_path, runtime = TMNet(in_path, out_path, args.gpu)
+        runtime = TMNet(in_path, out_path, args.gpu)
     elif args.model == "SOF-VSR-BI":
-        model_path, runtime = SOFVSR(in_path, out_path, args.gpu, 'BI')
+        runtime = SOFVSR(in_path, out_path, args.gpu, 'BI')
     elif args.model == "SOF-VSR-BD":
-        model_path, runtime = SOFVSR(in_path, out_path, args.gpu, 'BD')
+        runtime = SOFVSR(in_path, out_path, args.gpu, 'BD')
     elif args.model == "LGFN":
-        model_path, runtime = LGFN(in_path, out_path, args.gpu)
+        runtime = LGFN(in_path, out_path, args.gpu)
     elif args.model == "BasicVSR":
-        model_path, runtime = BasicVSR(in_path, out_path, args.gpu)
+        runtime = BasicVSR(in_path, out_path, args.gpu)
     elif args.model == "RSDN":
-        model_path, runtime = RSDN(in_path, out_path, args.gpu)
+        runtime = RSDN(in_path, out_path, args.gpu)
 
     if in_path_orig != in_path:
         os.system(f"rm -r {in_path}")
@@ -205,8 +187,8 @@ def main():
     if args.csv_file is not None and runtime is not None:
         process_time(runtime, args.csv_file, args.model, in_path_orig)
 
-    if not args.keep_model and model_path is not None:
-        os.system(f"rm -r {model_path}")
+    if not args.keep_model:
+        os.system(f"rm -r ~/__SR_models__")
 
 if __name__ == "__main__":
     main()
