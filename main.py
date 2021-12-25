@@ -41,15 +41,9 @@ def DBVSR(in_path, out_path, gpu):
 
 def TMNet(in_path, out_path, gpu):
     clone_repository("TMNet")
-
-    start_time = datetime.now()
-    _, vids, _ = next(os.walk(in_path))
-    for vid in vids:
-        os.system(f"docker run -it -v ~/__SR_models__/TMNet:/model -v {in_path}/{vid}:/dataset --shm-size=8192mb --gpus='\"device={gpu}\"' --rm tmnet")
-        os.system(f"mv ~/__SR_models__/TMNet/result/ {out_path}/{vid}")
-    end_time = datetime.now()
-
-    return end_time - start_time
+    runtime = run_docker("TMNet", "tmnet", in_path, gpu, root=True)
+    move_frames("TMNet", "result", out_path)
+    return runtime
 
 
 def SOFVSR(in_path, out_path, gpu, degradation='BI'):
