@@ -43,6 +43,8 @@ def main():
         RSDN(in_path, out_path, args.gpu, time_csv=args.csv_file)
     elif args.model == "RBPN":
         RBPN(in_path, out_path, args.gpu, time_csv=args.csv_file)
+    elif args.model == "iSeeBetter":
+        iSeeBetter(in_path, out_path, args.gpu, time_csv=args.csv_file)
     else:
         print(f"Wrong model: {args.model}")
         return
