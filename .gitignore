@@ -1,3 +1,4 @@
 *csv
 results/*
 run.sh
+__pycache__/
