@@ -61,10 +61,17 @@ def RBPN(in_path, out_path, gpu, time_csv=None):
     run_docker("RBPN", "rbpn", in_path, gpu, root=True, time_file=time_csv)
     move_frames("RBPN", "result", out_path)
 
+
 def iSeeBetter(in_path, out_path, gpu, time_csv=None):
     clone_repository("iSeeBetter")
     run_command("wget --no-check-certificate https://drive.google.com/uc?export=download&id=1ROADZavabsQTX8Mc8R4GWNZ7eIwGoS_n -O ~/__SR_models__/iSeeBetter/weights/RBPN_4x.pth")
     run_docker("iSeeBetter", "iseebetter", in_path, gpu, root=True, time_file=time_csv)
     move_frames("iSeeBetter", "result", out_path)
 
+
+def EGVSR(in_path, out_path, gpu, time_csv=None):
+    clone_repository("EGVSR")
+    run_command("wget --no-check-certificate https://drive.google.com/uc?export=download&id=1CnWavBgBim6-oRFWD6oCzUEesps44bEG -O ~/__SR_models__/EGVSR/pretrained_models/EGVSR_iter420000.pth")
+    run_docker("EGVSR", "egvsr", in_path, gpu, root=True, time_file=time_csv)
+    move_frames("EGVSR", "result", out_path)
 
