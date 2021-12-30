@@ -75,3 +75,9 @@ def EGVSR(in_path, out_path, gpu, time_csv=None):
     run_docker("EGVSR", "egvsr", in_path, gpu, root=True, time_file=time_csv)
     move_frames("EGVSR", "result", out_path)
 
+
+def RealSR(in_path, out_path, gpu, time_csv=None):
+    clone_repository("RealSR")
+    run_docker("RealSR", "realsr", in_path, gpu, root=False, time_file=time_csv)
+    move_frames("RealSR", "result", out_path)
+

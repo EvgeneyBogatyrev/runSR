@@ -47,6 +47,8 @@ def main():
         iSeeBetter(in_path, out_path, args.gpu, time_csv=args.csv_file)
     elif args.model == "EGVSR":
         EGVSR(in_path, out_path, args.gpu, time_csv=args.csv_file)
+    elif args.model == "RealSR":
+        RealSR(in_path, out_path, args.gpu, time_csv=args.csv_file)
     else:
         print(f"Wrong model: {args.model}")
         return

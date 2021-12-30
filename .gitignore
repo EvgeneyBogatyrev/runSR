@@ -1,4 +1,6 @@
 *csv
 results/*
 run.sh
+run2.sh
 __pycache__/
+docker/DynaVSR/
