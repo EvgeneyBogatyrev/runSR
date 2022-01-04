@@ -6,7 +6,15 @@ from multiprocessing import Process
 import signal
 
 
-def print_progress(model_path, input_path, skip_frames, time_file=None):
+def format_path(path):
+    if '~' in path:
+        path = path.replace('~', os.path.expanduser('~'))
+    else:
+        path = os.path.abspath(path)
+    return path
+
+
+def print_progress(model_path, input_path, out_path, skip_frames, time_file=None):
     missed_frames = 0
     if skip_frames:
         missed_frames = 2
@@ -23,15 +31,15 @@ def print_progress(model_path, input_path, skip_frames, time_file=None):
     exhausted_videos = []
 
     while True:
-        if not os.path.exists(f"{model_path}/result"):
+        if not os.path.exists(f"{out_path}"):
             continue
 
-        videos = os.listdir(f"{model_path}/result")
+        videos = os.listdir(f"{out_path}")
 
         for video in videos:
-            if video not in exhausted_videos or len(exhausted_videos) == total_videos:
+            if (video not in exhausted_videos or len(exhausted_videos) == total_videos) and video in input_videos:
                 if current_video is not None:
-                    current_frames = min(len(os.listdir(f"{model_path}/result/{current_video}")), number_of_frames[current_video])
+                    current_frames = min(len(os.listdir(f"{out_path}/{current_video}")), number_of_frames[current_video])
                     if current_frames >= number_of_frames[current_video] - missed_frames:
                         runtime[current_video] = datetime.now() - timer
                         print(f"{current_video} : {current_frames}/{number_of_frames[current_video]}\n", end='\r')
@@ -48,7 +56,7 @@ def print_progress(model_path, input_path, skip_frames, time_file=None):
                 break
 
         if current_video is not None:
-            current_frames = len(os.listdir(f"{model_path}/result/{current_video}"))
+            current_frames = len(os.listdir(f"{out_path}/{current_video}"))
             print(f"{current_video} : {current_frames}/{number_of_frames[current_video]}", end='\r')
 
 
@@ -93,19 +101,24 @@ def clone_repository(model):
         Path(os.path.join(os.path.expanduser("~"), "__SR_models__")).mkdir(parents=True, exist_ok=True)
         run_command(f"git clone https://github.com/EvgeneyZ/{model}.git ~/__SR_models__/{model}")
     run_command(f"chmod -R 0777 ~/__SR_models__/{model}")
-    run_command(f"rm -r ~/__SR_models__/{model}/result")
+    run_command(f"rm -rf ~/__SR_models__/{model}/result")
     print(f"Cloning repository to ~/__SR_models__/{model}... Done!")
 
 
-def run_docker(model, image_name, in_path, gpu, root=False, skip_frames=False, time_file=None):
+def run_docker(model, image_name, in_paths, out_path, gpu, root=False, skip_frames=False, time_file=None):
     print("Running SR model...\n")
     addition = ""
     if not root:
         addition = "--user $(id -u):$(id -g) "
 
-    command = f"docker run -it -v ~/__SR_models__/{model}:/model -v {in_path}:/dataset --shm-size=8192mb " + addition + f"--gpus device={gpu} --rm {image_name}"
+    mount = ""
+    for path in in_paths:
+        name = os.path.basename(os.path.normpath(path))
+        mount += f"-v {path}:/dataset/{name} "
 
-    p = Process(target=print_progress, args=[os.path.join(os.path.expanduser('~'), f"__SR_models__/{model}"), in_path, skip_frames, time_file])
+    command = f"docker run -it -v ~/__SR_models__/{model}:/model -v {out_path}:/results {mount} --shm-size=8192mb " + addition + f"--gpus device={gpu} --rm {image_name}"
+
+    p = Process(target=print_progress, args=[os.path.join(os.path.expanduser('~'), f"__SR_models__/{model}"), Path(in_paths[0]).parent.absolute(), out_path, skip_frames, time_file])
     p.start()
     
     run_command(command)
@@ -122,7 +135,7 @@ def move_frames(model, subdir, out_path):
     for video in videos:
         run_command(f"rm -r {out_path}/{video}")
         run_command(f"mv ~/__SR_models__/{model}/{subdir}/{video} {out_path}/{video}")
-    run_command(f"rm -r ~/__SR_models__/{model}/{subdir}")
+    #run_command(f"rm -r ~/__SR_models__/{model}/{subdir}")
     print(f"Moving results to {out_path}... Done!")
 
 
