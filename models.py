@@ -70,3 +70,7 @@ def RealSR(in_path, out_path, gpu, time_csv=None):
     clone_repository("RealSR")
     run_docker("RealSR", "realsr", in_path, out_path, gpu, root=False, time_file=time_csv)
 
+
+def Real_ESRGAN(in_path, out_path, gpu, time_csv=None):
+    clone_repository("Real-ESRGAN")
+    run_docker("Real-ESRGAN", "real-esrgan", in_path, out_path, gpu, root=True, time_file=time_csv)

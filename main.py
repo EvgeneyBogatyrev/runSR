@@ -58,6 +58,8 @@ def main():
         iSeeBetter(in_paths, out_path, args.gpu, time_csv=args.csv_file)
     elif args.model == "EGVSR":
         EGVSR(in_paths, out_path, args.gpu, time_csv=args.csv_file)
+    elif args.model == "Real-ESRGAN":
+        Real_ESRGAN(in_paths, out_path, args.gpu, time_csv=args.csv_file)
     elif args.model == "RealSR":
         RealSR(in_paths, out_path, args.gpu, time_csv=args.csv_file)
     else:
