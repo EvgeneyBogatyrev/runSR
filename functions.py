@@ -14,21 +14,26 @@ def format_path(path):
     return path
 
 
-def print_progress(model_path, input_path, out_path, skip_frames, time_file=None):
+def print_progress(model_path, input_videos, out_path, skip_frames, time_file=None):
     missed_frames = 0
     if skip_frames:
         missed_frames = 2
 
-    input_videos = os.listdir(input_path)
     number_of_frames = {}
     runtime = {}
 
+    input_video_names = []
     for video in input_videos:
-        number_of_frames[video] = len(os.listdir(f"{input_path}/{video}"))
+        video_name = list(video.split('/'))[-1]
+        input_video_names.append(video_name)
+        number_of_frames[video_name] = len(os.listdir(video))
+    input_videos = input_video_names[:]  
 
     total_videos = len(number_of_frames.keys())
     current_video = None
     exhausted_videos = []
+    timer_start = False
+    start_num_frames = 0
 
     while True:
         if not os.path.exists(f"{out_path}"):
@@ -44,7 +49,7 @@ def print_progress(model_path, input_path, out_path, skip_frames, time_file=None
                         runtime[current_video] = datetime.now() - timer
                         print(f"{current_video} : {current_frames}/{number_of_frames[current_video]}\n", end='\r')
                         if time_file is not None:
-                            process_time(list(model_path.split('/'))[-1], current_video, runtime[current_video], number_of_frames[current_video], time_file)
+                            process_time(list(model_path.split('/'))[-1], current_video, runtime[current_video], number_of_frames[current_video] - start_num_frames, time_file)
                         if len(exhausted_videos) == total_videos:
                             return
                     else:
@@ -53,9 +58,14 @@ def print_progress(model_path, input_path, out_path, skip_frames, time_file=None
                 timer = datetime.now()
                 current_video = video
                 exhausted_videos.append(video)
+                timer_start = False
                 break
 
         if current_video is not None:
+            if not timer_start and len(os.listdir(f"{out_path}/{current_video}")) > 0:
+                timer_start = True
+                timer = datetime.now()
+                start_num_frames = len(os.listdir(f"{out_path}/{current_video}"))
             current_frames = len(os.listdir(f"{out_path}/{current_video}"))
             print(f"{current_video} : {current_frames}/{number_of_frames[current_video]}", end='\r')
 
