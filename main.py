@@ -2,7 +2,7 @@ import os
 import shutil
 from pathlib import Path
 import argparse
-from models import *
+import models
 from functions import *
 
 def main():
@@ -39,36 +39,13 @@ def main():
 
     print_model_info(args.model)
 
-    if args.model == "DBVSR":
-        DBVSR(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    elif args.model == "TMNet":
-        TMNet(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    elif args.model == "SOF-VSR-BI":
-        SOFVSR(in_paths, out_path, args.gpu, 'BI', time_csv=args.csv_file)
-    elif args.model == "SOF-VSR-BD":
-        SOFVSR(in_paths, out_path, args.gpu, 'BD', time_csv=args.csv_file)
-    elif args.model == "LGFN":
-        LGFN(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    elif args.model == "BasicVSR":
-        BasicVSR(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    elif args.model == "RSDN":
-        RSDN(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    elif args.model == "RBPN":
-        RBPN(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    elif args.model == "iSeeBetter":
-        iSeeBetter(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    elif args.model == "EGVSR":
-        EGVSR(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    elif args.model == "Real-ESRGAN":
-        Real_ESRGAN(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    elif args.model == "SwinIR":
-        SwinIR(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    elif args.model == "RealSR":
-        RealSR(in_paths, out_path, args.gpu, time_csv=args.csv_file)
-    else:
-        print(f"Wrong model: {args.model}")
+    model = args.model.replace("-", "_")
+    try:
+        getattr(models, model)(in_paths, out_path, args.gpu, time_csv=args.csv_file)
+    except AttributeError:
+        print(f"No such model: {args.model}")
         return
-    
+
     if in_path_orig != in_path:
         if os.path.exists(in_path):
             shutil.rmtree(in_path, ignore_errors=True)

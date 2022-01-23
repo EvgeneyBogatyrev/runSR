@@ -30,6 +30,14 @@ def SOFVSR(in_path, out_path, gpu, degradation='BI', time_csv=None):
     add_missing_frames(out_path, in_path)
 
 
+def SOF_VSR_BD(in_path, out_path, gpu, time_csv=None):
+    SOFVSR(in_path, out_path, gpu, "BI", time_csv)
+
+
+def SOF_VSR_BI(in_path, out_path, gpu, time_csv=None):
+    SOFVSR(in_path, out_path, gpu, "BD", time_csv)
+
+
 def LGFN(in_path, out_path, gpu, time_csv=None):
     clone_repository('LGFN')
     run_docker("LGFN", "lgfn", in_path, out_path, gpu, root=True, skip_frames=True, time_file=time_csv)
