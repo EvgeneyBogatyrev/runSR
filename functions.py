@@ -75,7 +75,7 @@ def get_user():
         subprocess.call(['id', '-u'], stdout=f)
     with open('__tmp', 'r') as f:
         res = f.readline()
-    subprocess.run(['rm', '__tmp'], capture_output=True)
+    os.remove("__tmp")
     return res.strip()
 
 
@@ -84,7 +84,7 @@ def get_group():
         subprocess.call(['id', '-g'], stdout=f)
     with open('__tmp', 'r') as f:
         res = f.readline()
-    subprocess.run(['rm', '__tmp'], capture_output=True)
+    os.remove("__tmp")
     return res.strip()
 
 
@@ -111,7 +111,7 @@ def clone_repository(model):
         Path(os.path.join(os.path.expanduser("~"), "__SR_models__")).mkdir(parents=True, exist_ok=True)
         run_command(f"git clone https://github.com/EvgeneyZ/{model}.git ~/__SR_models__/{model}")
     run_command(f"chmod -R 0777 ~/__SR_models__/{model}")
-    run_command(f"rm -rf ~/__SR_models__/{model}/result")
+    os.remove(f"~/__SR_models__/{model}/result")
     print(f"Cloning repository to ~/__SR_models__/{model}... Done!")
 
 
@@ -146,9 +146,9 @@ def move_frames(model, subdir, out_path):
     print(f"Moving results to {out_path}...", end='\r')
     videos = os.listdir(os.path.join(os.path.expanduser('~'), f"__SR_models__/{model}/{subdir}"))
     for video in videos:
-        run_command(f"rm -r {out_path}/{video}")
+        os.remove(f"{out_path}/{video}")
         run_command(f"mv ~/__SR_models__/{model}/{subdir}/{video} {out_path}/{video}")
-    #run_command(f"rm -r ~/__SR_models__/{model}/{subdir}")
+        os.remove(f"~/__SR_models__/{model}/{subdir}")
     print(f"Moving results to {out_path}... Done!")
 
 

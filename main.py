@@ -69,13 +69,13 @@ def main():
         return
     
     if in_path_orig != in_path:
-        run_command(f"rm -rf {in_path}")
+        os.remove(in_path)
         run_command(f"ffmpeg -i {out_path}/folder/frame%04d.png -c copy {out_path}/frame%04d.png")
-        run_command(f"rm -rf {out_path}/folder")
-    
+        os.remove(f"{out_path}/folder")
+
     if not args.keep_model:
         print("Removing SR model...", end='\r')
-        run_command(f"rm -rf ~/__SR_models__")
+        os.remove("~/__SR_models__")
         print("Removing SR model... Done!")
 
 
