@@ -49,7 +49,7 @@ def main():
     if in_path_orig != in_path:
         if os.path.exists(in_path):
             shutil.rmtree(in_path, ignore_errors=True)
-        run_command(f"ffmpeg -i {out_path}/folder/frame%04d.png -c copy {out_path}/frame%04d.png")
+        run_command(f"cp -a {out_path}/folder/. {out_path}/")
         if os.path.exists(f"{out_path}/folder"):
             shutil.rmtree(f"{out_path}/folder", ignore_errors=True)
 
