@@ -175,15 +175,20 @@ def process_input(in_path):
     return os.path.abspath(os.path.join(os.path.expanduser('~'), "__dataset__"))
 
 
-def add_missing_frames(out_path):
+def add_missing_frames(out_path, video_list=None):
     print("Duplicating the first and the last frame...", end='\r')
+
+    if video_list is not None:
+        video_names = [list(x.split('/'))[0] for x in video_list]
+
     videos = os.listdir(out_path)
     for video in videos:
-        run_command(f"ffmpeg -hide_banner -loglevel error -y -i {out_path}/{video}/frame0002.png -c copy {out_path}/{video}/frame0001.png")
-        frames_num = len(os.listdir(f"{out_path}/{video}"))
-        target = f"frame{str(frames_num).zfill(4)}.png"
-        copy = f"frame{str(frames_num + 1).zfill(4)}.png"
-        run_command(f"ffmpeg -hide_banner -loglevel error -y -i {out_path}/{video}/{target} -c copy {out_path}/{video}/{copy}")
+        if video_list is None or video in video_list:
+            run_command(f"ffmpeg -hide_banner -loglevel error -y -i {out_path}/{video}/frame0002.png -c copy {out_path}/{video}/frame0001.png")
+            frames_num = len(os.listdir(f"{out_path}/{video}"))
+            target = f"frame{str(frames_num).zfill(4)}.png"
+            copy = f"frame{str(frames_num + 1).zfill(4)}.png"
+            run_command(f"ffmpeg -hide_banner -loglevel error -y -i {out_path}/{video}/{target} -c copy {out_path}/{video}/{copy}")
     print("Duplicating the first and the last frame... Done!")
 
 

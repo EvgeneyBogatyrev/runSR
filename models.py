@@ -5,7 +5,7 @@ def DBVSR(in_path, out_path, gpu, time_csv=None):
     clone_repository("DBVSR")
     run_docker("DBVSR", "dbvsr", in_path,  os.path.join(os.path.expanduser("~"), "__SR_models__/DBVSR/result"), gpu, root=True, skip_frames=True, time_file=time_csv)
     move_frames("DBVSR", "result", out_path)
-    add_missing_frames(out_path)
+    add_missing_frames(out_path, in_path)
 
 
 def TMNet(in_path, out_path, gpu, time_csv=None):
@@ -27,13 +27,13 @@ def SOFVSR(in_path, out_path, gpu, degradation='BI', time_csv=None):
     else:
         run_docker("SOF-VSR-BD", "sof-vsr", in_path, out_path, gpu, skip_frames=True, time_file=time_csv)
 
-    add_missing_frames(out_path)
+    add_missing_frames(out_path, in_path)
 
 
 def LGFN(in_path, out_path, gpu, time_csv=None):
     clone_repository('LGFN')
     run_docker("LGFN", "lgfn", in_path, out_path, gpu, root=True, skip_frames=True, time_file=time_csv)
-    add_missing_frames(out_path)
+    add_missing_frames(out_path, in_path)
 
 
 def BasicVSR(in_path, out_path, gpu, time_csv=None):

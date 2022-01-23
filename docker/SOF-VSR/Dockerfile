@@ -14,7 +14,7 @@ RUN apt-get install vim -y
 RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.sh -O ~/anaconda.sh && /bin/bash ~/anaconda.sh -b -p /opt/conda && rm ~/anaconda.sh && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && find /opt/conda/ -follow -type f -name '*.a' -delete && find /opt/conda/ -follow -type f -name '*.js.map' -delete && /opt/conda/bin/conda clean -afy
 ENV PATH=/opt/conda/bin:$PATH
 RUN pip uninstall Pillow -y
-RUN pip install numpy==1.15.0 Pillow
+RUN pip install numpy==1.15.0 "pillow<7"
 RUN pip install torch==0.4.1.post2 torchvision==0.2.2
 RUN apt-get update -y
 RUN apt-get install ffmpeg libsm6 libxext6 -y
