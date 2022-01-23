@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 from datetime import datetime
 import subprocess
@@ -75,7 +76,8 @@ def get_user():
         subprocess.call(['id', '-u'], stdout=f)
     with open('__tmp', 'r') as f:
         res = f.readline()
-    os.remove("__tmp")
+    if os.path.exists("__tmp"):
+        os.remove("__tmp")
     return res.strip()
 
 
@@ -84,7 +86,8 @@ def get_group():
         subprocess.call(['id', '-g'], stdout=f)
     with open('__tmp', 'r') as f:
         res = f.readline()
-    os.remove("__tmp")
+    if os.path.exists("__tmp"):
+        os.remove("__tmp")
     return res.strip()
 
 
@@ -111,7 +114,8 @@ def clone_repository(model):
         Path(os.path.join(os.path.expanduser("~"), "__SR_models__")).mkdir(parents=True, exist_ok=True)
         run_command(f"git clone https://github.com/EvgeneyZ/{model}.git ~/__SR_models__/{model}")
     run_command(f"chmod -R 0777 ~/__SR_models__/{model}")
-    os.remove(f"~/__SR_models__/{model}/result")
+    if os.path.exists(f"~/__SR_models__/{model}/result"):
+        shutil.rmtree(f"~/__SR_models__/{model}/result", ignore_errors=True)
     print(f"Cloning repository to ~/__SR_models__/{model}... Done!")
 
 
@@ -146,9 +150,11 @@ def move_frames(model, subdir, out_path):
     print(f"Moving results to {out_path}...", end='\r')
     videos = os.listdir(os.path.join(os.path.expanduser('~'), f"__SR_models__/{model}/{subdir}"))
     for video in videos:
-        os.remove(f"{out_path}/{video}")
+        if os.path.exists(f"{out_path}/{video}"):
+            shutil.rmtree(f"{out_path}/{video}", ignore_errors=True)
         run_command(f"mv ~/__SR_models__/{model}/{subdir}/{video} {out_path}/{video}")
-        os.remove(f"~/__SR_models__/{model}/{subdir}")
+        if os.path.exists(f"~/__SR_models__/{model}/{subdir}"):
+            shutil.rmtree(f"~/__SR_models__/{model}/{subdir}", ignore_errors=True)
     print(f"Moving results to {out_path}... Done!")
 
 

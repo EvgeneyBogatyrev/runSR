@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 import argparse
 from models import *
@@ -69,13 +70,16 @@ def main():
         return
     
     if in_path_orig != in_path:
-        os.remove(in_path)
+        if os.path.exists(in_path):
+            shutil.rmtree(in_path, ignore_errors=True)
         run_command(f"ffmpeg -i {out_path}/folder/frame%04d.png -c copy {out_path}/frame%04d.png")
-        os.remove(f"{out_path}/folder")
+        if os.path.exists(f"{out_path}/folder"):
+            shutil.rmtree(f"{out_path}/folder", ignore_errors=True)
 
     if not args.keep_model:
         print("Removing SR model...", end='\r')
-        os.remove("~/__SR_models__")
+        if os.path.exists(f"~/__SR_models__/{args.model}"):
+            shutil.rmtree(f"~/__SR_models__/{args.model}", ignore_errors=True)
         print("Removing SR model... Done!")
 
 
