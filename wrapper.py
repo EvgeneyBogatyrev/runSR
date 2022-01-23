@@ -14,6 +14,10 @@ def main():
     args = parser.parse_args()
 
     json_path = os.path.abspath(args.options)
+    if not os.path.isfile(json_path):
+        print(f"{json_path} does not exist")
+        return
+
     with open(json_path, 'r') as f:
         info = json.load(f)
 

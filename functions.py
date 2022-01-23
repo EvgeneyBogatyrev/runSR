@@ -128,7 +128,10 @@ def run_docker(model, image_name, in_paths, out_path, gpu, root=False, skip_fram
 
     command = f"docker run -it -v ~/__SR_models__/{model}:/model -v {out_path}:/results {mount} --shm-size=8192mb " + addition + f"--gpus device={gpu} --rm {image_name}"
 
-    p = Process(target=print_progress, args=[os.path.join(os.path.expanduser('~'), f"__SR_models__/{model}"), Path(in_paths[0]).parent.absolute(), out_path, skip_frames, time_file])
+    if image_name == "swinir":
+        p = Process(target=print_progress, args=[os.path.join(os.path.expanduser('~'), f"__SR_models__/{model}/SwinIR"), in_paths, out_path, skip_frames, time_file])
+    else:
+        p = Process(target=print_progress, args=[os.path.join(os.path.expanduser('~'), f"__SR_models__/{model}"), in_paths, out_path, skip_frames, time_file])
     p.start()
     
     run_command(command)
