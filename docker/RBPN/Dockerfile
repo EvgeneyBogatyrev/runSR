@@ -16,5 +16,7 @@ RUN pip install Cython
 RUN pip install --upgrade pip
 RUN pip install tensorflow keras scipy Pillow scikit-image scikit-learn 
 RUN apt-get clean
+RUN mkdir /.local
+RUN chmod -R 0777 /.local
 
 CMD ["python3", "/model/run.py"]

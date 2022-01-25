@@ -13,4 +13,13 @@ RUN apt-get update -y
 RUN apt-get install ffmpeg libsm6 libxext6 -y
 RUN apt-get clean
 RUN pip install basicsr
+
+RUN mkdir -p /usr/local/lib/python3.8/dist-packages/setuptools/command/
+RUN chmod -R 0777 /usr/local/lib/python3.8
+
+RUN mkdir -p /usr/lib/python3.8/site-packages/
+RUN chmod -R 0777 /usr/lib/python3.8/site-packages/
+
+RUN chmod -R 0777 /usr/bin
+
 CMD ["python3", "/model/run.py"]

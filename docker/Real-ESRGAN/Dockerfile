@@ -17,4 +17,15 @@ RUN pip install basicsr facexlib gfpgan
 RUN pip install numpy opencv-python Pillow tqdm
 RUN apt-get clean -y
 
+RUN mkdir -p /usr/lib/python3.8/site-packages
+RUN chmod -R 0777 /usr/lib/python3.8/site-packages
+
+RUN mkdir -p /usr/local/lib/python3.8/dist-packages/facexlib/weights
+RUN chmod -R 0777 /usr/local/lib/python3.8/dist-packages/facexlib
+
+RUN chmod -R 0777 /usr/bin
+
+RUN mkdir -p /usr/local/lib/python3.8/dist-packages/
+RUN chmod -R 0777 /usr/local/lib/python3.8/dist-packages
+
 CMD ["python3", "/model/run.py"]

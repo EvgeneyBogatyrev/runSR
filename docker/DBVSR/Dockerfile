@@ -13,5 +13,7 @@ RUN pip install matplotlib scikit-image opencv-python tqdm
 RUN apt-get update
 RUN apt-get install ffmpeg libsm6 libxext6 -y
 RUN apt-get clean -y
+RUN mkdir /.cupy
+RUN chmod -R 0777 /.cupy
 
 CMD ["python3", "/model/run.py"]

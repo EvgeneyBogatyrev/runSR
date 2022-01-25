@@ -20,4 +20,10 @@ RUN conda install pytorch==1.0.1 torchvision==0.2.2 cudatoolkit=10.0 -c pytorch
 RUN pip install tensorboard==1.11.0 tensorboardX==1.4
 RUN apt-get clean
 
+RUN mkdir -p /opt/conda/lib/python3.7/site-packages/
+RUN chmod -R 0777 /opt/conda/lib/python3.7/site-packages/
+
+RUN mkdir -p build/bdist.linux-x86_64/egg
+RUN chmod -R 0777 build
+
 CMD ["python3", "/model/run.py"]
