@@ -10,7 +10,7 @@ def DBVSR(in_path, out_path, gpu, time_csv=None):
 
 def TMNet(in_path, out_path, gpu, time_csv=None):
     clone_repository("TMNet")
-    run_docker("TMNet", "tmnet", in_path, out_path, gpu, root=True, time_file=time_csv)
+    run_docker("TMNet", "tmnet", in_path, out_path, gpu, root=False, time_file=time_csv)
 
 
 def SOFVSR(in_path, out_path, gpu, degradation='BI', time_csv=None):

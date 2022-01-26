@@ -21,5 +21,8 @@ RUN pip install torch==1.3.1 opencv-python torchvision==0.4.2
 RUN pip uninstall Pillow -y
 RUN pip install "pillow<7"
 RUN apt-get clean
-CMD ["python3", "/model/run.py"]
 
+RUN mkdir -p /opt/conda/lib/python3.7/site-packages
+RUN chmod -R 0777 /opt/conda/lib/python3.7/site-packages
+
+CMD ["python3", "/model/run.py"]
