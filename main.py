@@ -53,7 +53,11 @@ def main():
     if in_path_orig != in_path:
         if os.path.exists(in_path):
             shutil.rmtree(in_path, ignore_errors=True)
-        run_command(f"cp -a {out_path}/folder/. {out_path}/")
+        #run_command(f"cp -a {out_path}/folder/. {out_path}/")
+        if os.name == "nt":
+            subprocess.run(["Xcopy", "/E", "/I", os.path.join(out_path, "folder"), out_path], capture_output=True)
+        else:
+            subprocess.run(["cp", "-a", f"{out_path}/folder/.", f"{out_path}/"], capture_output=True)
         if os.path.exists(f"{out_path}/folder"):
             shutil.rmtree(f"{out_path}/folder", ignore_errors=True)
 

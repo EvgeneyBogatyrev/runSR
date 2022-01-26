@@ -103,6 +103,5 @@ def SRMD(in_path, out_path, gpu, time_csv=None, scale=2):
     for path in in_path:
         out_directory = os.path.join(out_path, os.path.basename(os.path.normpath(path)))
         Path(out_directory).mkdir(exist_ok=True, parents=True)
-        run_command(f"~\\__SR_models__\\SRMD\\srmd.exe -i {path} -o {out_directory} -s {scale} -v")
-
+        subprocess.run([os.path.join(os.path.expanduser('~'), "__SR_models__", "SRMD", "srmd.exe"), "-i", path, "-o", out_directory, "-s", str(scale), "-v"], capture_output=True)
     p.join()

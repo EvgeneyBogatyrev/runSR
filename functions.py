@@ -112,7 +112,8 @@ def clone_repository(model):
     print(f"Cloning repository to ~/__SR_models__/{model}...", end='\r')
     if not os.path.exists(f"~/__SR_models__/{model}"):
         Path(os.path.join(os.path.expanduser("~"), "__SR_models__")).mkdir(parents=True, exist_ok=True)
-        run_command(f"git clone https://github.com/EvgeneyZ/{model}.git ~/__SR_models__/{model}")
+        #run_command(f"git clone https://github.com/EvgeneyZ/{model}.git ~/__SR_models__/{model}")
+        subprocess.run(["git", "clone", f"https://github.com/EvgeneyZ/{model}.git", os.path.join(os.path.expanduser("~"), "__SR_models__", model)], capture_output=True)
     
     if os.path.exists(f"~/__SR_models__/{model}/result"):
         shutil.rmtree(f"~/__SR_models__/{model}/result", ignore_errors=True)
@@ -138,7 +139,7 @@ def run_docker(model, image_name, in_paths, out_path, gpu, root=False, skip_fram
         p = Process(target=print_progress, args=[os.path.join(os.path.expanduser('~'), f"__SR_models__/{model}"), in_paths, out_path, skip_frames, time_file])
     p.start()
     
-    run_command(command)
+    run_command(command) # Later use docker SDK
     
     os.kill(p.pid, signal.SIGTERM)
     p.join()
@@ -152,7 +153,8 @@ def move_frames(model, subdir, out_path):
     for video in videos:
         if os.path.exists(f"{out_path}/{video}"):
             shutil.rmtree(f"{out_path}/{video}", ignore_errors=True)
-        run_command(f"mv ~/__SR_models__/{model}/{subdir}/{video} {out_path}/{video}")
+        #run_command(f"mv ~/__SR_models__/{model}/{subdir}/{video} {out_path}/{video}")
+        subprocess.run(["mv", os.path.join(os.path.expanduser('~'), "__SR_models__", model, subdir, video), os.path.join(out_path, video)], capture_output=True)
         if os.path.exists(f"~/__SR_models__/{model}/{subdir}"):
             shutil.rmtree(f"~/__SR_models__/{model}/{subdir}", ignore_errors=True)
     print(f"Moving results to {out_path}... Done!")
@@ -176,7 +178,11 @@ def process_input(in_path):
         return in_path
 
     Path(os.path.join(os.path.expanduser("~"), "__dataset__/folder")).mkdir(parents=True, exist_ok=True)
-    run_command(f"cp -a {in_path}/. ~/__dataset__/folder/")
+    #run_command(f"cp -a {in_path}/. ~/__dataset__/folder/")
+    if os.name == "nt":
+        subprocess.run(["Xcopy", "/E", "/I", in_path, os.path.join(os.path.expanduser("~"), "__dataset__", "folder")], capture_output=True)
+    else:
+        subprocess.run(["cp", "-a", f"{in_path}/.", os.path.join(os.path.expanduser("~"), "__dataset__", "folder") + "/"], capture_output=True)
 
     return os.path.abspath(os.path.join(os.path.expanduser('~'), "__dataset__"))
 
@@ -185,16 +191,16 @@ def add_missing_frames(out_path, video_list=None):
     print("Duplicating the first and the last frame...", end='\r')
 
     if video_list is not None:
-        video_names = [list(x.split('/'))[-1] for x in video_list]
+        video_names = [os.path.basename(os.path.normpath(x)) for x in video_list]
 
     videos = os.listdir(out_path)
     for video in videos:
         if video_names is None or video in video_names:
-            run_command(f"cp {out_path}/{video}/frame0002.png {out_path}/{video}/frame0001.png")
+            shutil.copy(os.path.join(out_path, video, "frame0002.png"), os.path.join(out_path, video, "frame0001.png"))
             frames_num = len(os.listdir(f"{out_path}/{video}"))
             target = f"frame{str(frames_num).zfill(4)}.png"
             copy = f"frame{str(frames_num + 1).zfill(4)}.png"
-            run_command(f"cp {out_path}/{video}/{target} {out_path}/{video}/{copy}")
+            shutil.copy(os.path.join(out_path, video, target), os.path.join(out_path, video, copy))
     print("Duplicating the first and the last frame... Done!")
 
 
