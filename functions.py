@@ -25,7 +25,7 @@ def print_progress(model_path, input_videos, out_path, skip_frames, time_file=No
 
     input_video_names = []
     for video in input_videos:
-        video_name = list(video.split('/'))[-1]
+        video_name = os.path.basename(os.path.normpath(video))
         input_video_names.append(video_name)
         number_of_frames[video_name] = len(os.listdir(video))
     input_videos = input_video_names[:]  
@@ -113,7 +113,7 @@ def clone_repository(model):
     if not os.path.exists(f"~/__SR_models__/{model}"):
         Path(os.path.join(os.path.expanduser("~"), "__SR_models__")).mkdir(parents=True, exist_ok=True)
         run_command(f"git clone https://github.com/EvgeneyZ/{model}.git ~/__SR_models__/{model}")
-    run_command(f"chmod -R 0777 ~/__SR_models__/{model}")
+    
     if os.path.exists(f"~/__SR_models__/{model}/result"):
         shutil.rmtree(f"~/__SR_models__/{model}/result", ignore_errors=True)
     print(f"Cloning repository to ~/__SR_models__/{model}... Done!")
@@ -211,3 +211,21 @@ def process_time(model_name, video, runtime, number_of_frames, out_file):
 
     with open(out_file, 'a') as f:
         f.write(model_name + "," + video + "," + str(number_of_frames) + "," + str(total_time) + "," + str(fps) + "," + str(s_it) + "\n")
+   
+
+def check_os(model):
+    windows_models = ["SRMD"]
+    both_systems = ["bicubic"]
+
+    if model in both_systems:
+        return True
+
+    if model in windows_models:
+        if os.name != "nt":
+            print(f"{model} is for Windows only. Please, use another OS.")
+            return False
+    else:
+        if os.name == "nt":
+            print(f"{model} is for Linux only. Please, run it on vg-gpu-01.")
+            return False
+    return True

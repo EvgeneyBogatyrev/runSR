@@ -1,19 +1,22 @@
 from functions import *
+from pathlib import Path
 import os
 
-def DBVSR(in_path, out_path, gpu, time_csv=None):
+### Linux models
+
+def DBVSR(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository("DBVSR")
     run_docker("DBVSR", "dbvsr", in_path,  os.path.join(os.path.expanduser("~"), "__SR_models__/DBVSR/result"), gpu, root=False, skip_frames=True, time_file=time_csv)
     move_frames("DBVSR", "result", out_path)
     add_missing_frames(out_path, in_path)
 
 
-def TMNet(in_path, out_path, gpu, time_csv=None):
+def TMNet(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository("TMNet")
     run_docker("TMNet", "tmnet", in_path, out_path, gpu, root=False, time_file=time_csv)
 
 
-def SOFVSR(in_path, out_path, gpu, degradation='BI', time_csv=None):
+def SOFVSR(in_path, out_path, gpu, degradation='BI', time_csv=None, scale=4):
     if degradation == 'BI':
         clone_repository("SOF-VSR-BI")
     elif degradation == 'BD':
@@ -30,60 +33,76 @@ def SOFVSR(in_path, out_path, gpu, degradation='BI', time_csv=None):
     add_missing_frames(out_path, in_path)
 
 
-def SOF_VSR_BD(in_path, out_path, gpu, time_csv=None):
+def SOF_VSR_BD(in_path, out_path, gpu, time_csv=None, scale=4):
     SOFVSR(in_path, out_path, gpu, "BI", time_csv)
 
 
-def SOF_VSR_BI(in_path, out_path, gpu, time_csv=None):
+def SOF_VSR_BI(in_path, out_path, gpu, time_csv=None, scale=4):
     SOFVSR(in_path, out_path, gpu, "BD", time_csv)
 
 
-def LGFN(in_path, out_path, gpu, time_csv=None):
+def LGFN(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository('LGFN')
     run_docker("LGFN", "lgfn", in_path, out_path, gpu, root=False, skip_frames=True, time_file=time_csv)
     add_missing_frames(out_path, in_path)
 
 
-def BasicVSR(in_path, out_path, gpu, time_csv=None):
+def BasicVSR(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository("BasicVSR")
     run_command("wget --no-check-certificate https://drive.google.com/uc?export=download&id=1EVMaV8-c2Q1r10N-CAuobIsbeSR-wptM -O ~/__SR_models__/BasicVSR/experiments/pretrained_models/BasicVSR_REDS4.pth")
     run_docker("BasicVSR", "basicvsr", in_path, out_path, gpu, root=False, time_file=time_csv)
 
 
-def RSDN(in_path, out_path, gpu, time_csv=None):
+def RSDN(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository("RSDN")
     run_docker("RSDN", "rsdn", in_path, out_path, gpu, time_file=time_csv)
 
 
-def RBPN(in_path, out_path, gpu, time_csv=None):
+def RBPN(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository("RBPN")
     run_command("wget --no-check-certificate https://drive.google.com/uc?export=download&id=11_4rsGOfbiAxqAoDoRq4vHMcXxRqc6Cc -O ~/__SR_models__/RBPN/weights/RBPN_4x.pth")
     run_docker("RBPN", "rbpn", in_path, out_path, gpu, root=False, time_file=time_csv)
 
 
-def iSeeBetter(in_path, out_path, gpu, time_csv=None):
+def iSeeBetter(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository("iSeeBetter")
     run_command("wget --no-check-certificate https://drive.google.com/uc?export=download&id=1ROADZavabsQTX8Mc8R4GWNZ7eIwGoS_n -O ~/__SR_models__/iSeeBetter/weights/RBPN_4x.pth")
     run_docker("iSeeBetter", "iseebetter", in_path, out_path, gpu, root=True, time_file=time_csv)
 
 
-def EGVSR(in_path, out_path, gpu, time_csv=None):
+def EGVSR(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository("EGVSR")
     run_command("wget --no-check-certificate https://drive.google.com/uc?export=download&id=1CnWavBgBim6-oRFWD6oCzUEesps44bEG -O ~/__SR_models__/EGVSR/pretrained_models/EGVSR_iter420000.pth")
     run_docker("EGVSR", "egvsr", in_path, os.path.join(os.path.expanduser('~'), "__SR_models__/EGVSR/result"), gpu, root=False, time_file=time_csv)
     move_frames("EGVSR", "result", out_path)
 
 
-def RealSR(in_path, out_path, gpu, time_csv=None):
+def RealSR(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository("RealSR")
     run_docker("RealSR", "realsr", in_path, out_path, gpu, root=False, time_file=time_csv)
 
 
-def Real_ESRGAN(in_path, out_path, gpu, time_csv=None):
+def Real_ESRGAN(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository("Real-ESRGAN")
     run_docker("Real-ESRGAN", "real-esrgan", in_path, out_path, gpu, root=False, time_file=time_csv)
 
 
-def SwinIR(in_path, out_path, gpu, time_csv=None):
+def SwinIR(in_path, out_path, gpu, time_csv=None, scale=4):
     clone_repository("Real-ESRGAN")
     run_docker("Real-ESRGAN", "swinir", in_path, out_path, gpu, root=False, time_file=time_csv)
+
+
+### Windows models
+
+def SRMD(in_path, out_path, gpu, time_csv=None, scale=2):
+    clone_repository("SRMD")
+    
+    p = Process(target=print_progress, args=[os.path.join(os.path.expanduser('~'), "__SR_models__", "SRMD"), in_path, out_path, False, time_csv])
+    p.start()
+    
+    for path in in_path:
+        out_directory = os.path.join(out_path, os.path.basename(os.path.normpath(path)))
+        Path(out_directory).mkdir(exist_ok=True, parents=True)
+        run_command(f"~\\__SR_models__\\SRMD\\srmd.exe -i {path} -o {out_directory} -s {scale} -v")
+
+    p.join()

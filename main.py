@@ -11,6 +11,7 @@ def main():
     parser.add_argument('--in_path', type=str, help="set path with input videos", required=True)
     parser.add_argument('--out_path', type=str, help="set path where to store output videos", required=True)
     parser.add_argument('--gpu', type=int, default=0, help="set gpu")
+    parser.add_argument('--scale', type=int, default=4, help="set scaling parameter")
     parser.add_argument('--keep_model', action='store_true', help="keep model directory")
     parser.add_argument('--csv_file', type=str, help="save csv with runtime")
     parser.add_argument('--video_names', action="append", nargs="+", help="set video names")
@@ -39,9 +40,12 @@ def main():
 
     print_model_info(args.model)
 
+    if not check_os(args.model):
+        return
+    
     model = args.model.replace("-", "_")
     try:
-        getattr(models, model)(in_paths, out_path, args.gpu, time_csv=args.csv_file)
+        getattr(models, model)(in_paths, out_path, args.gpu, time_csv=args.csv_file, scale=args.scale)
     except AttributeError:
         print(f"No such model: {args.model}")
         return
@@ -55,8 +59,11 @@ def main():
 
     if not args.keep_model:
         print("Removing SR model...", end='\r')
-        if os.path.exists(f"~/__SR_models__/{args.model}"):
-            shutil.rmtree(f"~/__SR_models__/{args.model}", ignore_errors=True)
+        if os.path.exists(os.path.join(os.path.expanduser("~"), "__SR_models__", args.model)):
+            if os.name != "nt":
+                shutil.rmtree(os.path.join(os.path.expanduser("~"), "__SR_models__", args.model), ignore_errors=True)
+            else:
+                os.system(f'rd /s /q {os.path.join(os.path.expanduser("~"), "__SR_models__", args.model)}')
         print("Removing SR model... Done!")
 
 
